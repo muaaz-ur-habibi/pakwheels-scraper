@@ -26,11 +26,12 @@ def scrape_used_cars_page(soup:bs, url:str):
     except AttributeError:
         print("Error occured trying to get total number of pages. Defaulting to 1")
         total_pages = 1
-    #total_pages = 2
-    
-    p = [str(i.text).replace("\n", "").strip()[4:] for i in soup.find_all("div", {"class": "price-details"})]
+
+    price = [str(i.text).replace("\n", "").strip()[4:] for i in soup.find_all("div", {"class": "price-details"})]
+    location = [i.findChild("li").text for i in soup.find_all("ul", {"class": "list-unstyled search-vehicle-info fs13"})]
+    other_d = [f"{i.findChildren('li')[0].text}, {i.findChildren('li')[1].text}, {i.findChildren('li')[2].text}, {i.findChildren('li')[3].text}, " for i in soup.find_all("ul", {"class": "list-unstyled search-vehicle-info-2 fs13"})]
     d = soup.find_all("a", {"class": "car-name"})
-    actual_data = [f'{i.findChild("h3").text}, f"{url}{i["href"]}", {p[idx]}' for idx, i in enumerate(d)]
+    actual_data = [f'{i.findChild("h3").text}, {price[idx]}, {location[idx]}, {other_d[idx]}, {url}{i["href"]}' for idx, i in enumerate(d)]
 
     return actual_data, total_pages
 
@@ -65,7 +66,7 @@ def save_data_to_file(file_path:str,
                       data_list:list) -> None:
     with open(file_path, "w") as file:
         for data in data_list:
-            file.write(data)
+            file.write(data + "\n")
 
     file.close()
 
